@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+const { createClient } = require('@supabase/supabase-js')
 
 const supabase = createClient("https://ozkykrmuikqgrjfwemus.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96a3lrcm11aWtxZ3JqZndlbXVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDg1NTgzOTQsImV4cCI6MjAyNDEzNDM5NH0.uw5P0WARTEleBzhNtraLsCEO2wp781rSzggxDI9dm8s");
 
@@ -7,7 +7,7 @@ const fetchTeamData = async () => {
 }
 
 const average = (oldAvg, newVal, denom) => {
-    return (oldAvg * (denom - 1) + newVal) / denom;
+    return ((oldAvg * (denom - 1) + newVal) / denom).toFixed(2);
 }
 
 const addAverages = (teamNumber, event, teamPoints) => {
@@ -21,7 +21,7 @@ const addAverages = (teamNumber, event, teamPoints) => {
         autoSpeaker: 0,
         climb: 0,
         trapPercent: 0,
-        taxipercent: 0,
+        taxiPercent: 0,
     };
     for(let i = 0; i < teamPoints.length; i++) {
         const match = teamPoints[i];
@@ -30,6 +30,8 @@ const addAverages = (teamNumber, event, teamPoints) => {
             climbPoints = 1;
         } else if (match.Endgame === "Climbed") {
             climbPoints = 3;
+        } else if (match.Endgame === 'Not Attempted') {
+            climbPoints = 0;
         } else {
             climbPoints = 5;
         }
@@ -40,7 +42,44 @@ const addAverages = (teamNumber, event, teamPoints) => {
         avg.autoSpeaker = average(avg.autoSpeaker, match.Auto_Speaker_Made, i + 1);
         avg.climb = average(avg.climb, climbPoints, i + 1);
         avg.trapPercent = average(avg.trapPercent, match.Trap === "Successful" ? 100 : 0, i + 1);
-        avg.taxipercent = average(avg.taxipercent, match.Taxi ? 100 : 0, i + 1);
+        avg.taxiPercent = average(avg.taxiPercent, match.Taxi ? 100 : 0, i + 1);
     }
 
+    return supabase.from('Averages').insert(avg);
+
 }
+
+const addAllAverages = async (competition) => {
+    const { data, error} = await fetchTeamData();
+    if(error) return console.error(error);
+
+    const resp = await fetch("https://www.thebluealliance.com/api/v3/event/" + competition + "/teams/simple",
+        {
+            method: "GET",
+            headers: {
+                "X-TBA-Auth-Key":
+                    "3MbBFKbSOrahWa5SA7GmFv6L9ByIly1nk0vUPPSK1xQnI4ccLvsF5FRknNFz1CAm",
+            },
+        });
+    if(!resp.ok) {
+        return console.error(resp.status)
+    }
+
+    const jsonResp = await resp.json();
+    const teamsArray = jsonResp.map((d) => d.team_number.toString());
+
+    console.log(teamsArray);
+
+    for(let i = 0; i < teamsArray.length; i++) {
+        const teamData = data.filter((d) => d.team === teamsArray[i]);
+
+        const averageData = await addAverages(teamsArray[i], '2024vabla', teamData);
+        if(averageData.error) {
+            console.error('fail');
+            return;
+        }
+        console.log('success');
+    }
+}
+
+addAllAverages('2024vabla');

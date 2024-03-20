@@ -17,7 +17,7 @@ app.post('/updateAverages/:eventName', async (req, res, next) => {
 })
 
 app.get('/', (req, res, next) => {
-    return res.send('ping');
+    return res.send('POST to /updateAverages/ with eventName after / to recalculate average data');
 })
 
 app.listen(process.env.PORT, () => {

@@ -10,7 +10,7 @@ app.use(cors());
 app.post('/updateAverages/:eventName', async (req, res, next) => {
     try {
         await addAllAverages(req.params.eventName);
-        return res.status(201);
+        return res.sendStatus(201);
     } catch (error) {
         return res.status(400).send(error.message);
     }

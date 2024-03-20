@@ -78,7 +78,6 @@ const addAllAverages = async (competition) => {
             throw averageData.error;
         }
     }
-    return 'success';
 }
 
 module.exports = addAllAverages;

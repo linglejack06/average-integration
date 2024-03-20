@@ -10,7 +10,7 @@ const average = (oldAvg, newVal, denom) => {
     return ((oldAvg * (denom - 1) + newVal) / denom).toFixed(2);
 }
 
-const addAverages = (teamNumber, event, teamPoints) => {
+const addAverages =  async (teamNumber, event, teamPoints) => {
     const avg = {
         teamNumber,
         event,
@@ -44,7 +44,7 @@ const addAverages = (teamNumber, event, teamPoints) => {
         avg.trapPercent = average(avg.trapPercent, match.Trap === "Successful" ? 100 : 0, i + 1);
         avg.taxiPercent = average(avg.taxiPercent, match.Taxi ? 100 : 0, i + 1);
     }
-
+    await supabase.from('Averages').delete().eq('teamNumber', avg.teamNumber).eq('event', avg.event);
     return supabase.from('Averages').insert(avg);
 
 }

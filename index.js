@@ -16,6 +16,10 @@ app.post('/updateAverages/:eventName', async (req, res, next) => {
     }
 })
 
+app.get('/', (req, res, next) => {
+    return res.send('ping');
+})
+
 app.listen(process.env.PORT, () => {
     console.log(`Server started at ${process.env.PORT}`)
 })

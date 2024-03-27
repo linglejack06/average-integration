@@ -73,7 +73,7 @@ const addAllAverages = async (competition) => {
     for(let i = 0; i < teamsArray.length; i++) {
         const teamData = data.filter((d) => d.team === teamsArray[i]);
 
-        const averageData = await addAverages(teamsArray[i], '2024vabla', teamData);
+        const averageData = await addAverages(teamsArray[i], competition, teamData);
         if(averageData.error) {
             throw averageData.error;
         }
